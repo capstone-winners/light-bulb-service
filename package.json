@@ -1,16 +1,24 @@
 {
   "name": "light-bulb-service",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./src/bin/www"
-  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
     "greengrass-core-sdk": "^1.5.0",
-    "morgan": "~1.9.1",
     "qrcode": "^1.4.4"
-  }
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/capstone-winners/light-bulb-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/capstone-winners/light-bulb-service/issues"
+  },
+  "homepage": "https://github.com/capstone-winners/light-bulb-service#readme"
 }
