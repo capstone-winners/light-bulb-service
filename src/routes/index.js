@@ -1,9 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const QRCode = require('../service/QrCodeGenerator');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.put('/light/:deviceId/status', function(req, res, next) {
+  QRCode.generateQR(req.body);
+  res.json({ message: "hello" });
 });
 
 module.exports = router;
