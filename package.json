@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "greengrass-core-sdk": "^1.5.0",
+    "aws-iot-device-sdk": "^2.2.3",
+    "lodash": "^4.17.15",
     "qrcode": "^1.4.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "^1.19.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
