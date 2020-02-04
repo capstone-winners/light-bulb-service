@@ -1,11 +1,13 @@
 const config = {
-   keyPath: "./472e9ea454-private.pem.key",
-  certPath: "./472e9ea454-certificate.pem.crt",
-    caPath: "rootCA.pem",
-    // note: clientId needs to be updated
-  clientId: 5,
-    // note: not sure wtf the AWS IoT endpoint will be
-      host: "bob.com",
+  keyPath: "../config/private.pem.key",
+  certPath: "../config/certificate.pem.crt",
+  caPath: "../config/rootCA.pem",
+  clientId: "Capstone_Pi",
+  host: "https://a33jti3e3cvwks-ats.iot.us-east-1.amazonaws.com",
+  region: "us-east-1",
+  baseReconnectTimeMs: 1000,
+  lightBulbBearerToken: "ABC",
+  lightBulbID: 123,
 };
 
 module.exports = config;

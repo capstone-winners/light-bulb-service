@@ -1,7 +1,11 @@
 const awsIot = require("aws-iot-device-sdk");
+const thingShadow = awsIot.thingShadow;
 const QRCode = require("qrcode");
 const config = require("config");
 const _ = require("lodash");
+const axios = require("axios");
+// configures axios to send the lifx Light Bulb Bearer Token with every request
+axios.default.headers.common['Authorizaton'] = config.lightBulbBearerToken;
 
 function generateQRCode(status) {
   // TODO: when using binary data must use a Uint8ClampedArray because:
@@ -21,47 +25,12 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function main() {
-  const device = awsIot.device({
-    keyPath: config.keyPath,
-    certPath: config.certPath,
-    caPath: config.caPath,
-    clientId: config.clientId,
-    host: config.host
-  });
-
-  device.on("connect", function() {
-    console.log("connected");
-    device.subscribe("iot_commands");
-
-    // TODO: this should get the status from light-bulb API (eg Philips Hue)
-    const status = {
-      id: 1,
-      deviceType: "light-bulb",
-      isOn: false,
-      brightness: 255,
-      color: "rgb(10, 155, 195)"
-    };
-
-    // TODO: this should send the QR code object to the screen to display
-    // there may be many ways of doing this, including changing QRCode.create
-    // to QRCode.toFile if that's easy and clean
-    console.log(generateQRCode(status));
-  });
-
-  // Every 5 mins poll the light-bulb API and get a new status/QRCode.
-  // TODO: how to regularly update the light-bulb status/QRCode without doing
-  // this ugly shit?
-  while (true) {
-      await sleep(300000);
-      // TODO: get new status
-      newStatus = { id: 2 };
-      if (!_.isEqual(status, newStatus)) {
-          status = newStatus;
-          console.log(generateQRCode(status));
-      }
-  }
+function getState(lightBulbId) {
+  return axios.get(`https://api.lifx.com/v1/lights/id:${lightBulbId}`);
 }
 
+function main() {
+  console.log(getState());
+}
 
 main();
