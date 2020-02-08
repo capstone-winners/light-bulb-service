@@ -1,13 +1,38 @@
 const lifx = require("node-lifx-lan");
 const _ = require("lodash");
 const QRCode = require("qrcode");
+const awsIot = require("aws-iot-device-sdk");
+
+const config = require("../config/config.js");
 
 class LiFxBulbManager {
+  // a LiFx lan device object, cached since discovering devices takes a long time
   bulb = null;
+  // The current light bulb state, a JSON object in `capstone-winners` format
   bulbState = null;
+  // the AWS IoT device, used for subscribing to MQTT topics
+  device = null;
 
   constructor(deviceName) {
     return (async deviceName => {
+      // Create the AWS IoT device and subscribe to it's topics
+      console.log(JSON.stringify(config));
+      this.device = awsIot.device({
+        keyPath: config.keyPath,
+        certPath: config.cerPath,
+        caPath: config.caPath,
+        clientId: config.clientId,
+        host: config.host,
+      });
+
+      this.device.on("connect", () => {
+        console.log("connected");
+        this.device.subscribe("light_bulb_actions");
+      });
+
+      this.device.on("message", handleAction);
+
+      // Get the initial LiFx bulb state
       this.bulb = await lifx
         .discover()
         .then(devices => {
@@ -22,6 +47,7 @@ class LiFxBulbManager {
         });
 
       const lifxState = await this.bulb.getLightState();
+      // convert LiFx state object to our format
       this.bulbState = lifxStateToCapstone_Yeet(
         lifxState,
         this.bulb.deviceInfo
@@ -58,7 +84,36 @@ class LiFxBulbManager {
       console.log(generateQRCode(this.bulbState));
     }
   }
+
+  async handleAction(topic, payload) {
+    if (payload["deviceId"] === this.device["deviceId"]) {
+      console.log(`Received a message on topic ${topic} for ${payload["deviceId"]}`);
+      if ("setColor" in payload) {
+        await this.bulb.setColor({
+          color: {
+            hue: payload["setColor"]["h"],
+            saturation: payload["setColor"]["s"],
+            brightness: payload["setColor"]["b"]
+          }
+        });
+      } else if ("setOn" in payload && payload["setOn"] === true) {
+        await this.bulb.turnOn();
+      } else if ("setOn" in payload && payload["setOn"] === false) {
+        await this.bulb.turnOff();
+      } else if ("setBrightness" in payload) {
+        await this.bulb.setColor({
+          color: {
+            hue: this.bulbState.color.h,
+            saturation: this.bulbState.color.s,
+            brightness: payload["setBrightness"],
+            kelvin: this.bulbState.color.k,
+          }
+        });
+      }
+    }
+  }
 }
+
 
 async function pollStatus(bulbManager) {
   // TODO: add logic for updating after receiving command
@@ -99,35 +154,6 @@ function generateQRCode(status) {
   // add zero'ed out buffer around image in Python
   // then display image on e-ink display
   return QRCode.create(JSON.stringify(status));
-}
-
-/**
- * Turns the light bulb on... ideally
- */
-async function turnBulbOn(bulb) {
-  // note this can optionally accept a color and a timeout interval
-  await bulb.turnOn();
-}
-
-/**
- * Changes the Color of the given bulb to the given color.
- */
-async function changeBulbColor(bulb, color) {
-  await bulb.setColor({
-    color: {
-      hue: color["h"],
-      saturation: color["s"],
-      brightness: color["b"]
-    }
-  });
-}
-
-/**
- * Turns the light bulb off... ideally
- */
-async function turnBulbOff(bulb) {
-  // note this can also accept a timeout interval
-  await bulb.turnOff();
 }
 
 /**
@@ -176,7 +202,4 @@ function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
 module.exports = {
   LiFxBulbManager,
   pollStatus,
-  changeBulbColor,
-  turnBulbOff,
-  turnBulbOn
 };
