@@ -5,8 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "aws-iot-device-sdk": "^2.2.3",
-    "axios": "^0.19.2",
     "lodash": "^4.17.15",
+    "node-lifx-lan": "^0.4.0",
     "qrcode": "^1.4.4"
   },
   "devDependencies": {

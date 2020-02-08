@@ -3,9 +3,7 @@ const thingShadow = awsIot.thingShadow;
 const QRCode = require("qrcode");
 const config = require("config");
 const _ = require("lodash");
-const axios = require("axios");
-// configures axios to send the lifx Light Bulb Bearer Token with every request
-axios.default.headers.common['Authorizaton'] = config.lightBulbBearerToken;
+const lifx  = require('node-lifx-lan');
 
 function generateQRCode(status) {
   // TODO: when using binary data must use a Uint8ClampedArray because:
@@ -26,7 +24,7 @@ function sleep(ms) {
 }
 
 function getState(lightBulbId) {
-  return axios.get(`https://api.lifx.com/v1/lights/id:${lightBulbId}`);
+  return 
 }
 
 function main() {
