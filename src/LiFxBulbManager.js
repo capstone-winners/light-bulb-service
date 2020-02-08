@@ -41,6 +41,30 @@ async function getStates() {
     });
 }
 
+async function pollStatus(bulbManager) {
+  // TODO: add logic for updating after receiving command
+  setTimeout(async () => {
+    const stateResponses = await Promise.all([
+      bulbManager.bulb.getLightState(),
+      bulbManager.bulb.getDeviceInfo()
+    ]);
+
+    const newState = lifxStateToCapstone_Yeet(
+      stateResponses[0],
+      stateResponses[1]
+    );
+
+    if (!_.isEqual(bulbManager.bulbState, newState)) {
+      console.log("state has changed");
+      // the light bulb state has changed
+      bulbManager.bulbState = newState;
+      console.log(generateQRCode(bulbManager.bulbState));
+    }
+    
+    pollStatus(bulbManager);
+  }, 5000);
+}
+
 class LiFxBulbManager {
   bulb = null;
   bulbState = null;
@@ -97,4 +121,4 @@ class LiFxBulbManager {
   }
 }
 
-module.exports = LiFxBulbManager;
+module.exports = { LiFxBulbManager, pollStatus };
