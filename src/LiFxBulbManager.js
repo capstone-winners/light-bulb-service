@@ -20,6 +20,27 @@ function generateQRCode(status) {
   return QRCode.create(JSON.stringify(status));
 }
 
+function turnBulbOn(bulb) {
+
+}
+
+/**
+ * Changes the Color of the given bulb to the given color.
+ */
+async function changeBulbColor(bulb, color) {
+  await bulb.setColor({
+    color: {
+      hue: color["h"],
+      saturation: color["s"],
+      brightness: color["b"],
+    }
+  });
+}
+
+function turnBulbOff(bulb) {
+
+}
+
 
 async function pollStatus(bulbManager) {
   // TODO: add logic for updating after receiving command
@@ -72,7 +93,7 @@ class LiFxBulbManager {
 
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
-      console.log(generateQRCode(this.bulbState));
+//      console.log(generateQRCode(this.bulbState));
       return this;
     })(deviceName);
   }
@@ -98,9 +119,9 @@ class LiFxBulbManager {
       this.bulbState = newState;
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
-//      console.log(generateQRCode(this.bulbState));
+      console.log(generateQRCode(this.bulbState));
     }
   }
 }
 
-module.exports = { LiFxBulbManager, pollStatus };
+module.exports = { LiFxBulbManager, pollStatus, changeBulbColor };
