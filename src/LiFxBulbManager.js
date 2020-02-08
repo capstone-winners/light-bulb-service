@@ -105,8 +105,9 @@ function generateQRCode(status) {
 /**
  * Turns the light bulb on... ideally
  */
-function turnBulbOn(bulb) {
-
+async function turnBulbOn(bulb) {
+  // note this can optionally accept a color and a timeout interval
+  await bulb.turnOn();
 }
 
 /**
@@ -125,8 +126,9 @@ async function changeBulbColor(bulb, color) {
 /**
  * Turns the light bulb off... ideally
  */
-function turnBulbOff(bulb) {
-
+async function turnBulbOff(bulb) {
+  // note this can also accept a timeout interval
+  await bulb.turnOff();
 }
 
 
