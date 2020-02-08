@@ -98,7 +98,7 @@ class LiFxBulbManager {
       this.bulbState = newState;
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
-      console.log(generateQRCode(this.bulbState));
+//      console.log(generateQRCode(this.bulbState));
     }
   }
 }

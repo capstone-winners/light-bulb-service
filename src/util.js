@@ -46,7 +46,7 @@ function HSVtoRGB(h, s, v) {
  *        "deviceId": "Vibe Check ",
  *        "deviceType": "light",
  *        "location": "Trap House",
- *        "group": "Toms Room"
+ *        "group": ["Toms Room"]
  *     }
  *  }
  */
@@ -59,15 +59,15 @@ function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
   return {
     isOn: lifxState.power === 1,
     brightness: lifxState.color.brightness,
-    color: { r: rgb[0], g: rgb[1], b: rgb[2], a: 1 },
+    color: { r: rgb["r"], g: rgb["g"], b: rgb["b"], a: 1 },
     super: {
       status: "ok", // TODO: don't hardcode
       deviceId: lifxState.label,
       deviceType: "light",
       location: lifxDeviceInfo.location.label,
-      group: lifxDeviceInfo.group.label
+      group: [lifxDeviceInfo.group.label]
     }
   };
 }
 
-module.exports = { sleep, lifxStateToCapstone_Yeet };
+module.exports = { lifxStateToCapstone_Yeet };
