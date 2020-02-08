@@ -29,7 +29,7 @@ class LiFxBulbManager {
 
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
-//      console.log(generateQRCode(this.bulbState));
+      console.log(generateQRCode(this.bulbState));
       return this;
     })(deviceName);
   }
@@ -79,11 +79,10 @@ async function pollStatus(bulbManager) {
       bulbManager.bulbState = newState;
       console.log(generateQRCode(bulbManager.bulbState));
     }
-    
+
     pollStatus(bulbManager);
   }, 10000);
 }
-
 
 function generateQRCode(status) {
   // left for debugging purposes
@@ -118,7 +117,7 @@ async function changeBulbColor(bulb, color) {
     color: {
       hue: color["h"],
       saturation: color["s"],
-      brightness: color["b"],
+      brightness: color["b"]
     }
   });
 }
@@ -130,7 +129,6 @@ async function turnBulbOff(bulb) {
   // note this can also accept a timeout interval
   await bulb.turnOff();
 }
-
 
 /**
  * Convert a LiFx bulb state object to our capstone format.
@@ -163,7 +161,7 @@ function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
       s: lifxState.color.saturation,
       b: lifxState.color.brightness,
       a: 1, // Do not change
-      k: 3500, // TODO: change if js/swift side can integrate on this
+      k: 3500 // TODO: change if js/swift side can integrate on this
     },
     super: {
       status: "ok", // TODO: don't hardcode
@@ -180,5 +178,5 @@ module.exports = {
   pollStatus,
   changeBulbColor,
   turnBulbOff,
-  turnBulbOn,
+  turnBulbOn
 };
