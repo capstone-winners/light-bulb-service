@@ -19,7 +19,7 @@ function sleep(ms) {
  *     "super": {
  *        "status": "ok",
  *        "deviceId": "Vibe Check ",
- *        "deviceType": "lightbulb",
+ *        "deviceType": "light",
  *        "location": "Trap House",
  *        "group": "Toms Room"
  *     }
@@ -38,7 +38,7 @@ function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
     super: {
       status: "ok", // TODO: don't hardcode
       deviceId: lifxState.label,
-      deviceType: "lightbulb",
+      deviceType: "light",
       location: lifxDeviceInfo.location.label,
       group: lifxDeviceInfo.group.label
     }

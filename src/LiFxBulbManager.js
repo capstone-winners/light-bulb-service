@@ -5,9 +5,18 @@ const { lifxStateToCapstone_Yeet } = require("./util");
 
 function generateQRCode(status) {
   // left for debugging purposes
-  //  QRCode.toFile("./hack-bean-pot.png", JSON.stringify(status));
+  /*
+  QRCode.toFile('./bitmap.bmp', JSON.stringify(status), {
+    "width": 176
+  }, function (err) {
+    if (err) throw err
+    console.log('done')
+  })
+  */
 
-  // TODO: convert to bitmap then ???? => display on screen
+  // TODO: call python script with QRCode data
+  // add zero'ed out buffer around image in Python
+  // then display image on e-ink display
   return QRCode.create(JSON.stringify(status));
 }
 
