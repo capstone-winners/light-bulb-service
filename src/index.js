@@ -5,15 +5,12 @@ const lifx = require("node-lifx-lan");
 const {
   LiFxBulbManager,
   pollStatus,
-  turnBulbOn
 } = require("./LiFxBulbManager");
 
 async function main() {
   console.log("hello world");
   const bulbManager = await new LiFxBulbManager("Vibe Check ");
   console.log(JSON.stringify(bulbManager.bulbState));
-
-  turnBulbOn(bulbManager.bulb);
 
   pollStatus(bulbManager);
 }

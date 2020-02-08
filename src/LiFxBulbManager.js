@@ -15,23 +15,6 @@ class LiFxBulbManager {
 
   constructor(deviceName) {
     return (async deviceName => {
-      // Create the AWS IoT device and subscribe to it's topics
-      console.log(JSON.stringify(config));
-      this.device = awsIot.device({
-        keyPath: config.keyPath,
-        certPath: config.cerPath,
-        caPath: config.caPath,
-        clientId: config.clientId,
-        host: config.host,
-      });
-
-      this.device.on("connect", () => {
-        console.log("connected");
-        this.device.subscribe("light_bulb_actions");
-      });
-
-      this.device.on("message", handleAction);
-
       // Get the initial LiFx bulb state
       this.bulb = await lifx
         .discover()
@@ -52,6 +35,22 @@ class LiFxBulbManager {
         lifxState,
         this.bulb.deviceInfo
       );
+
+      // Create the AWS IoT device and subscribe to it's topics
+      this.device = awsIot.device({
+        keyPath: config.keyPath,
+        certPath: config.certPath,
+        caPath: config.caPath,
+        clientId: config.clientId,
+        host: config.host,
+      });
+
+      this.device.on("connect", () => {
+        console.log("connected");
+        this.device.subscribe("light_bulb_actions");
+      });
+
+      this.device.on("message", this.handleAction);
 
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
