@@ -1,9 +1,9 @@
 const awsIot = require("aws-iot-device-sdk");
 const thingShadow = awsIot.thingShadow;
 const QRCode = require("qrcode");
-const config = require("config");
+const config = require("../config/config.js");
 const _ = require("lodash");
-const lifx  = require('node-lifx-lan');
+const lifx = require("node-lifx-lan");
 
 function generateQRCode(status) {
   // TODO: when using binary data must use a Uint8ClampedArray because:
@@ -24,11 +24,25 @@ function sleep(ms) {
 }
 
 function getState(lightBulbId) {
-  return 
+  lifx
+    .discover()
+    .then(device_list => {
+      device_list.forEach(device => {
+        console.log(
+          [device["ip"], device["mac"], device["deviceInfo"]["label"]].join(
+            " | "
+          )
+        );
+      });
+    })
+    .catch(error => {
+      console.error(error);
+    });
 }
 
 function main() {
-  console.log(getState());
+  console.log("hello world");
+  getState();
 }
 
 main();

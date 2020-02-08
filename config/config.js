@@ -7,7 +7,7 @@ const config = {
   region: "us-east-1",
   baseReconnectTimeMs: 1000,
   lightBulbBearerToken: "ABC",
-  lightBulbID: 123,
+  lightBulbID: 123
 };
 
 module.exports = config;
