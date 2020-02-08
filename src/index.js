@@ -16,6 +16,7 @@ async function main() {
   console.log(JSON.stringify(bulbManager));
 
   while (true) {
+    // TODO: add logic for updating after receiving command
     await util.sleep(5000);
     bulbManager.updateState();
     console.log("updated state");
