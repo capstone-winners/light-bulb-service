@@ -4,6 +4,8 @@ const QRCode = require("qrcode");
 const config = require("../config/config.js");
 const _ = require("lodash");
 const lifx = require("node-lifx-lan");
+const LiFxBulbManager = require("./LiFxBulbManager");
+
 
 function generateQRCode(status) {
   // TODO: when using binary data must use a Uint8ClampedArray because:
@@ -11,7 +13,7 @@ function generateQRCode(status) {
   // const dataArray = new Uint8ClampedArray([0, 1, 1, 1, 1, 1]);
 
   // left for debugging purposes
-  // QRCode.toFile("./hi-andrew.png", JSON.stringify(status));
+  QRCode.toFile("./hack-bean-pot.png", JSON.stringify(status));
 
   // TODO: first argument of create can either be a string or a list of objects
   // describing segments of the QR code.... not sure how to do the latter,
@@ -54,7 +56,11 @@ async function getStates() {
 
 async function main() {
   console.log("hello world");
-  console.log(await getStates());
+//  const states = await getStates();
+//  console.log(states);
+//  generateQRCode(states[0]);
+  const bulbManager = await new LiFxBulbManager("Vibe Check ");
+  console.log(JSON.stringify(bulbManager));
 }
 
 main();
