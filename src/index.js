@@ -23,34 +23,38 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Returns an array of JSON objects, each object represents the state
-// of a LIFX bulb in a LAN. The format of the JSON is:
-// ...
-function getStates() {
-  lifx
+// Returns an array of Promises, where each promise resolves to a JSON object.
+// Each object represents the state of a LIFX bulb in a LAN. The format of the
+// the array of JSON objects is:
+// [
+//  {
+//     color: { hue: 0.61181, saturation: 1, brightness: 0.01999, kelvin: 3500 },
+//     power: 1,
+//     label: 'Vibe Check ',
+//     infrared: null,
+//     multizone: null,
+//     chain: null
+//   }
+// ]
+// for more information on what these fields mean, check out:
+// https://www.npmjs.com/package/node-lifx-lan#getlightstate-method
+async function getStates() {
+  return lifx
     .discover()
     .then(device_list => {
-      device_list.forEach(async device => {
-        console.log(
-          [device["ip"], device["mac"], device["deviceInfo"]["label"]].join(
-            " | "
-          )
-        );
-        console.log("\n Device object:\n" + JSON.stringify(device));
-        const x = await device.getLightState();
-        console.log(
-          "\n Device state:\n" + JSON.stringify(x)
-        );
-      });
+      return Promise.all(device_list.map(device => {
+        return device.getLightState();
+      }))
     })
     .catch(error => {
       console.error(error);
     });
 }
 
-function main() {
+
+async function main() {
   console.log("hello world");
-  getStates();
+  console.log(await getStates());
 }
 
 main();
