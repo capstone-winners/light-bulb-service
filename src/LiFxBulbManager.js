@@ -20,35 +20,6 @@ function generateQRCode(status) {
   return QRCode.create(JSON.stringify(status));
 }
 
-// Returns an array of Promises, where each promise resolves to a JSON object.
-// Each object represents the state of a LIFX bulb in a LAN. The format of the
-// the array of JSON objects is:
-// [
-//  {
-//     color: { hue: 0.61181, saturation: 1, brightness: 0.01999, kelvin: 3500 },
-//     power: 1,
-//     label: 'Vibe Check ',
-//     infrared: null,
-//     multizone: null,
-//     chain: null
-//   }
-// ]
-// for more information on what these fields mean, check out:
-// https://www.npmjs.com/package/node-lifx-lan#getlightstate-method
-async function getStates() {
-  return lifx
-    .discover()
-    .then(device_list => {
-      return Promise.all(
-        device_list.map(device => {
-          return device.getLightState();
-        })
-      );
-    })
-    .catch(error => {
-      console.error(error);
-    });
-}
 
 async function pollStatus(bulbManager) {
   // TODO: add logic for updating after receiving command
@@ -125,6 +96,8 @@ class LiFxBulbManager {
       console.log("state has changed");
       // the light bulb state has changed
       this.bulbState = newState;
+      // TODO: remove console.log once we convert to bitmap and display on
+      // screen
       console.log(generateQRCode(this.bulbState));
     }
   }

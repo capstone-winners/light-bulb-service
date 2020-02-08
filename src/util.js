@@ -1,8 +1,4 @@
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 /* accepts parameters
  * h  Object = {h:x, s:y, v:z}
  * OR 
