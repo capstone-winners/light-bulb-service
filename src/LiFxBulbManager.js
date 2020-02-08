@@ -1,70 +1,6 @@
 const lifx = require("node-lifx-lan");
 const _ = require("lodash");
 const QRCode = require("qrcode");
-const { lifxStateToCapstone_Yeet } = require("./util"); 
-
-function generateQRCode(status) {
-  // left for debugging purposes
-  /*
-  QRCode.toFile('./bitmap.bmp', JSON.stringify(status), {
-    "width": 176
-  }, function (err) {
-    if (err) throw err
-    console.log('done')
-  })
-  */
-
-  // TODO: call python script with QRCode data
-  // add zero'ed out buffer around image in Python
-  // then display image on e-ink display
-  return QRCode.create(JSON.stringify(status));
-}
-
-function turnBulbOn(bulb) {
-
-}
-
-/**
- * Changes the Color of the given bulb to the given color.
- */
-async function changeBulbColor(bulb, color) {
-  await bulb.setColor({
-    color: {
-      hue: color["h"],
-      saturation: color["s"],
-      brightness: color["b"],
-    }
-  });
-}
-
-function turnBulbOff(bulb) {
-
-}
-
-
-async function pollStatus(bulbManager) {
-  // TODO: add logic for updating after receiving command
-  setTimeout(async () => {
-    const stateResponses = await Promise.all([
-      bulbManager.bulb.getLightState(),
-      bulbManager.bulb.getDeviceInfo()
-    ]);
-
-    const newState = lifxStateToCapstone_Yeet(
-      stateResponses[0],
-      stateResponses[1]
-    );
-
-    if (!_.isEqual(bulbManager.bulbState, newState)) {
-      console.log("state has changed");
-      // the light bulb state has changed
-      bulbManager.bulbState = newState;
-      console.log(generateQRCode(bulbManager.bulbState));
-    }
-    
-    pollStatus(bulbManager);
-  }, 5000);
-}
 
 class LiFxBulbManager {
   bulb = null;
@@ -124,4 +60,123 @@ class LiFxBulbManager {
   }
 }
 
-module.exports = { LiFxBulbManager, pollStatus, changeBulbColor };
+async function pollStatus(bulbManager) {
+  // TODO: add logic for updating after receiving command
+  setTimeout(async () => {
+    const stateResponses = await Promise.all([
+      bulbManager.bulb.getLightState(),
+      bulbManager.bulb.getDeviceInfo()
+    ]);
+
+    const newState = lifxStateToCapstone_Yeet(
+      stateResponses[0],
+      stateResponses[1]
+    );
+
+    if (!_.isEqual(bulbManager.bulbState, newState)) {
+      console.log("state has changed");
+      // the light bulb state has changed
+      bulbManager.bulbState = newState;
+      console.log(generateQRCode(bulbManager.bulbState));
+    }
+    
+    pollStatus(bulbManager);
+  }, 10000);
+}
+
+
+function generateQRCode(status) {
+  // left for debugging purposes
+  /*
+  QRCode.toFile('./bitmap.bmp', JSON.stringify(status), {
+    "width": 176
+  }, function (err) {
+    if (err) throw err
+    console.log('done')
+  })
+  */
+
+  // TODO: call python script with QRCode data
+  // add zero'ed out buffer around image in Python
+  // then display image on e-ink display
+  return QRCode.create(JSON.stringify(status));
+}
+
+/**
+ * Turns the light bulb on... ideally
+ */
+function turnBulbOn(bulb) {
+
+}
+
+/**
+ * Changes the Color of the given bulb to the given color.
+ */
+async function changeBulbColor(bulb, color) {
+  await bulb.setColor({
+    color: {
+      hue: color["h"],
+      saturation: color["s"],
+      brightness: color["b"],
+    }
+  });
+}
+
+/**
+ * Turns the light bulb off... ideally
+ */
+function turnBulbOff(bulb) {
+
+}
+
+
+/**
+ * Convert a LiFx bulb state object to our capstone format.
+ * Returns the status object in the `capstone-winners` format.
+ * {
+ *     "isOn": true,
+ *     "brightness": 0.01999,
+ *     "color": {
+ *        "h": 0,
+ *        "s": 0,
+ *        "b": 0,
+ *        "a": 1,
+ *        "k": 3500,
+ *     },
+ *     "super": {
+ *        "status": "ok",
+ *        "deviceId": "Vibe Check ",
+ *        "deviceType": "light",
+ *        "location": "Trap House",
+ *        "group": ["Toms Room"]
+ *     }
+ *  }
+ */
+function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
+  return {
+    isOn: lifxState.power === 1,
+    brightness: lifxState.color.brightness,
+    color: {
+      h: lifxState.color.hue,
+      s: lifxState.color.saturation,
+      b: lifxState.color.brightness,
+      a: 1, // Do not change
+      k: 3500, // TODO: change if js/swift side can integrate on this
+    },
+    super: {
+      status: "ok", // TODO: don't hardcode
+      deviceId: lifxState.label,
+      deviceType: "light",
+      location: lifxDeviceInfo.location.label,
+      group: [lifxDeviceInfo.group.label]
+    }
+  };
+}
+
+module.exports = {
+  LiFxBulbManager,
+  pollStatus,
+  changeBulbColor,
+  turnBulbOff,
+  turnBulbOn,
+};
