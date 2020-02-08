@@ -23,15 +23,23 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function getState(lightBulbId) {
+// Returns an array of JSON objects, each object represents the state
+// of a LIFX bulb in a LAN. The format of the JSON is:
+// ...
+function getStates() {
   lifx
     .discover()
     .then(device_list => {
-      device_list.forEach(device => {
+      device_list.forEach(async device => {
         console.log(
           [device["ip"], device["mac"], device["deviceInfo"]["label"]].join(
             " | "
           )
+        );
+        console.log("\n Device object:\n" + JSON.stringify(device));
+        const x = await device.getLightState();
+        console.log(
+          "\n Device state:\n" + JSON.stringify(x)
         );
       });
     })
@@ -42,7 +50,7 @@ function getState(lightBulbId) {
 
 function main() {
   console.log("hello world");
-  getState();
+  getStates();
 }
 
 main();
