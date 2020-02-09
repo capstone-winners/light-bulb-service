@@ -50,7 +50,8 @@ class LiFxBulbManager {
         this.device.subscribe("light_bulb_actions");
       });
 
-      this.device.on("message", this.handleAction);
+      const bindedFunc = this.handleAction.bind(this);
+      this.device.on("message", bindedFunc);
 
       // TODO: remove console.log once we convert to bitmap and display on
       // screen
@@ -84,8 +85,11 @@ class LiFxBulbManager {
     }
   }
 
-  async handleAction(topic, payload) {
-    if (payload["deviceId"] === this.device["deviceId"]) {
+  async handleAction(topic, msg) {
+    const payload = JSON.parse(msg.toString());
+    console.log(payload["deviceId"] + " and " + JSON.stringify(this.bulbState));
+
+    if (payload["deviceId"] === this.bulbState["super"]["deviceId"]) {
       console.log(`Received a message on topic ${topic} for ${payload["deviceId"]}`);
       if ("setColor" in payload) {
         await this.bulb.setColor({
