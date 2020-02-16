@@ -15,7 +15,9 @@ class LiFxBulbManager {
 
   constructor(deviceName) {
     return (async deviceName => {
-      // Get the initial LiFx bulb state
+      // Discover all available LiFx lights in current LAN, and store the 
+      // LiFx object representing the one with the given `deviceName`.
+      // Also retrieves the current status of that light bulb.
       this.bulb = await lifx
         .discover()
         .then(devices => {
@@ -26,7 +28,8 @@ class LiFxBulbManager {
           return b;
         })
         .catch(err => {
-          throw new Error("Could not discover devices " + err.message);
+          console.log(`Error: ${err.message}`);
+          throw new Error(`Error: ${err.message}`);
         });
 
       const lifxState = await this.bulb.getLightState();
@@ -50,12 +53,15 @@ class LiFxBulbManager {
         this.device.subscribe("light_bulb_actions");
       });
 
+      // bind the `handleAction` function to this `LiFxBulbManager` so that
+      // `this` is in the correct context when a message is received and the
+      // `handleAction` function is called
       const bindedFunc = this.handleAction.bind(this);
       this.device.on("message", bindedFunc);
 
-      // TODO: remove console.log once we convert to bitmap and display on
-      // screen
-      console.log(generateQRCode(this.bulbState));
+      // TODO: remove console.log once we can correctly pad the image. Instead
+      // of logging this object, we will display it on the e-ink display.
+      console.debug(generateQRCode(this.bulbState));
       return this;
     })(deviceName);
   }
@@ -76,18 +82,17 @@ class LiFxBulbManager {
     );
 
     if (!_.isEqual(this.bulbState, newState)) {
-      console.log("state has changed");
       // the light bulb state has changed
+      console.debug("state has changed");
       this.bulbState = newState;
-      // TODO: remove console.log once we convert to bitmap and display on
-      // screen
-      console.log(generateQRCode(this.bulbState));
+      // TODO: remove console.log once we can correctly pad the image. Instead
+      // of logging this object, we will display it on the e-ink display.
+      console.debug(generateQRCode(this.bulbState));
     }
   }
 
   async handleAction(topic, msg) {
     const payload = JSON.parse(msg.toString());
-    console.log(payload["deviceId"] + " and " + JSON.stringify(this.bulbState));
 
     if (payload["deviceId"] === this.bulbState["super"]["deviceId"]) {
       console.log(`Received a message on topic ${topic} for ${payload["deviceId"]}`);
