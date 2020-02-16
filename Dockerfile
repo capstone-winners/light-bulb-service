@@ -8,4 +8,6 @@ RUN \
   apt-get install -y curl git htop man vim wget time tmux && \
   apt-get update -y && \
   apt-get upgrade -y && \
-  rm -rf /var/lib/apt/lists/*
+  curl -sL https://deb.nodesource.com/setup_12.x | bash && \
+  apt-get install -y nodejs
+
