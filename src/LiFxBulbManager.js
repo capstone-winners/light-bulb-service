@@ -15,7 +15,7 @@ class LiFxBulbManager {
 
   constructor(deviceName) {
     return (async deviceName => {
-      // Discover all available LiFx lights in current LAN, and store the 
+      // Discover all available LiFx lights in current LAN, and store the
       // LiFx object representing the one with the given `deviceName`.
       // Also retrieves the current status of that light bulb.
       this.bulb = await lifx
@@ -23,21 +23,18 @@ class LiFxBulbManager {
         .then(devices => {
           const b = devices.find(d => d["deviceInfo"]["label"] === deviceName);
           if (_.isNil(b)) {
-            throw new Error(`Could not find bulb named ${deviceName}`);
+            const msg = `Could not find bulb named ${deviceName}`;
+            generateErrorQRCode(msg);
+            throw new Error(msg);
           }
           return b;
         })
         .catch(err => {
-          console.log(`Error: ${err.message}`);
+          console.error(`Error: ${err.message}`);
           throw new Error(`Error: ${err.message}`);
         });
 
-      const lifxState = await this.bulb.getLightState();
-      // convert LiFx state object to our format
-      this.bulbState = lifxStateToCapstone_Yeet(
-        lifxState,
-        this.bulb.deviceInfo
-      );
+      this.updateState();
 
       // Create the AWS IoT device and subscribe to it's topics
       this.device = awsIot.device({
@@ -45,7 +42,7 @@ class LiFxBulbManager {
         certPath: config.certPath,
         caPath: config.caPath,
         clientId: config.clientId,
-        host: config.host,
+        host: config.host
       });
 
       this.device.on("connect", () => {
@@ -75,7 +72,10 @@ class LiFxBulbManager {
     const stateResponses = await Promise.all([
       this.bulb.getLightState(),
       this.bulb.getDeviceInfo()
-    ]);
+    ]).catch(err => {
+      console.error(`Error: ${err.message}`);
+      generateErrorQRCode(`Could not get status of ${deviceName}`);
+    });
     const newState = lifxStateToCapstone_Yeet(
       stateResponses[0],
       stateResponses[1]
@@ -95,28 +95,48 @@ class LiFxBulbManager {
     const payload = JSON.parse(msg.toString());
 
     if (payload["deviceId"] === this.bulbState["super"]["deviceId"]) {
-      console.log(`Received a message on topic ${topic} for ${payload["deviceId"]}`);
+      console.log(
+        `Received a message on topic ${topic} for ${payload["deviceId"]}`
+      );
       if ("setColor" in payload) {
-        await this.bulb.setColor({
-          color: {
-            hue: payload["setColor"]["h"],
-            saturation: payload["setColor"]["s"],
-            brightness: payload["setColor"]["b"]
-          }
-        });
+        await this.bulb
+          .setColor({
+            color: {
+              hue: payload["setColor"]["h"],
+              saturation: payload["setColor"]["s"],
+              brightness: payload["setColor"]["b"]
+            }
+          })
+          .catch(err => {
+            console.error(`Error: ${err.message}`);
+            generateErrorQRCode(`Could not update the color of ${deviceName}`);
+          });
       } else if ("setOn" in payload && payload["setOn"] === true) {
-        await this.bulb.turnOn();
-      } else if ("setOn" in payload && payload["setOn"] === false) {
-        await this.bulb.turnOff();
-      } else if ("setBrightness" in payload) {
-        await this.bulb.setColor({
-          color: {
-            hue: this.bulbState.color.h,
-            saturation: this.bulbState.color.s,
-            brightness: payload["setBrightness"],
-            kelvin: this.bulbState.color.k,
-          }
+        await this.bulb.turnOn().catch(err => {
+          console.error(`Error: ${err.message}`);
+          generateErrorQRCode(`Could not turn on ${deviceName}`);
         });
+      } else if ("setOn" in payload && payload["setOn"] === false) {
+        await this.bulb.turnOff().catch(err => {
+          console.error(`Error: ${err.message}`);
+          generateErrorQRCode(`Could not turn off ${deviceName}`);
+        });
+      } else if ("setBrightness" in payload) {
+        await this.bulb
+          .setColor({
+            color: {
+              hue: this.bulbState.color.h,
+              saturation: this.bulbState.color.s,
+              brightness: payload["setBrightness"],
+              kelvin: this.bulbState.color.k
+            }
+          })
+          .catch(err => {
+            console.error(`Error: ${err.message}`);
+            generateErrorQRCode(
+              `Could not update the brightness of ${deviceName}`
+            );
+          });
       }
       // the state has changed, so update the state and generate a new QR code
       this.updateState();
@@ -131,6 +151,17 @@ async function pollStatus(bulbManager) {
   }, 10000);
 }
 
+/**
+ * Generate a QR code with an error message.
+ */
+function generateErrorQRCode(message) {
+  const errorObject = { error: message };
+  generateQRCode(errorObject);
+}
+
+/**
+ * Generate a QR Code with the given status
+ */
 function generateQRCode(status) {
   // left for debugging purposes
   /*
@@ -193,5 +224,5 @@ function lifxStateToCapstone_Yeet(lifxState, lifxDeviceInfo) {
 
 module.exports = {
   LiFxBulbManager,
-  pollStatus,
+  pollStatus
 };
