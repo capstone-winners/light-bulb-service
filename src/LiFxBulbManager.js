@@ -30,8 +30,8 @@ class LiFxBulbManager {
           return b;
         })
         .catch(err => {
-          console.error(`Error: ${err.message}`);
-          throw new Error(`Error: ${err.message}`);
+          console.error(err.message);
+          throw new Error(err.message);
         });
 
       this.updateState();
@@ -73,7 +73,7 @@ class LiFxBulbManager {
       this.bulb.getLightState(),
       this.bulb.getDeviceInfo()
     ]).catch(err => {
-      console.error(`Error: ${err.message}`);
+      console.error(err.message);
       generateErrorQRCode(`Could not get status of ${deviceName}`);
     });
     const newState = lifxStateToCapstone_Yeet(
@@ -108,17 +108,17 @@ class LiFxBulbManager {
             }
           })
           .catch(err => {
-            console.error(`Error: ${err.message}`);
+            console.error(err.message);
             generateErrorQRCode(`Could not update the color of ${deviceName}`);
           });
       } else if ("setOn" in payload && payload["setOn"] === true) {
         await this.bulb.turnOn().catch(err => {
-          console.error(`Error: ${err.message}`);
+          console.error(err.message);
           generateErrorQRCode(`Could not turn on ${deviceName}`);
         });
       } else if ("setOn" in payload && payload["setOn"] === false) {
         await this.bulb.turnOff().catch(err => {
-          console.error(`Error: ${err.message}`);
+          console.error(err.message);
           generateErrorQRCode(`Could not turn off ${deviceName}`);
         });
       } else if ("setBrightness" in payload) {
@@ -132,7 +132,7 @@ class LiFxBulbManager {
             }
           })
           .catch(err => {
-            console.error(`Error: ${err.message}`);
+            console.error(err.message);
             generateErrorQRCode(
               `Could not update the brightness of ${deviceName}`
             );
