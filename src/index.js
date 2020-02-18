@@ -8,7 +8,7 @@ const {
 } = require("./LiFxBulbManager");
 
 async function main() {
-  const bulbManager = await new LiFxBulbManager("Vibe Check ");
+  const bulbManager = await new LiFxBulbManager("vibe-check");
   console.debug(JSON.stringify(bulbManager.bulbState));
 
   pollStatus(bulbManager);

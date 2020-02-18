@@ -47,7 +47,7 @@ class LiFxBulbManager {
 
       this.device.on("connect", () => {
         console.log("connected");
-        this.device.subscribe("light_bulb_actions");
+        this.device.subscribe("light");
       });
 
       // bind the `handleAction` function to this `LiFxBulbManager` so that
