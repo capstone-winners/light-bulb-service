@@ -14,4 +14,6 @@ RUN \
 WORKDIR /cap
 COPY . .
 
+RUN npm i
+
 
