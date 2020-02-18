@@ -7,6 +7,7 @@ const config = require("../config/config.js");
 
 class LiFxBulbManager {
   // a LiFx lan device object, cached since discovering devices takes a long time
+  // https://www.npmjs.com/package/node-lifx-lan#LifxLanDevice-object
   bulb = null;
   // The current light bulb state, a JSON object in `capstone-winners` format
   bulbState = null;
