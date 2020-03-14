@@ -29,7 +29,8 @@ class LiFxBulbManager {
         certPath: config.certPath,
         caPath: config.caPath,
         clientId: config.clientId,
-        host: config.host
+        host: config.host,
+        port: config.port
       });
 
       // Subscribe to the 'light' Greengrass message topic
