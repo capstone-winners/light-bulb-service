@@ -45,7 +45,8 @@ class LiFxBulbManager {
         certPath: config.certPath,
         caPath: config.caPath,
         clientId: config.clientId,
-        host: config.host
+        host: config.host,
+        port: config.port
       });
 
       this.device.on("connect", () => {
@@ -156,7 +157,7 @@ async function pollStatus(bulbManager) {
  */
 function generateErrorQRCode(message) {
   const errorObject = { error: message };
-  generateQRCode(errorObject);
+  generateQRCode(errorObject, 'error');
 }
 
 /**
@@ -170,8 +171,8 @@ function generateQRCode(status, deviceName) {
   }, function (err) {
     if (err) throw err;
     console.debug('Saved a qr code from node');
-  })
-  const pyProg = spawn('python', ['../py-resize.py', '-f', `./${deviceName}.bmp`]);
+  });
+  const pyProg = spawn('python', ['./pycode/py-resize.py', '-f', `./${deviceName}.bmp`]);
 }
 
 /**
