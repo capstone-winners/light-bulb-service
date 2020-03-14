@@ -166,13 +166,15 @@ function generateErrorQRCode(message) {
  * the image and then displays it on the e-ink display.
  */
 function generateQRCode(status, deviceName) {
-  QRCode.toFile(`./${deviceName}.bmp`, JSON.stringify(status), {
+  console.log('Generating a QR code for status:');
+  console.log(JSON.stringify(status));
+  QRCode.toFile(`./pycode/${deviceName}.bmp`, JSON.stringify(status), {
     "width": 176
   }, function (err) {
     if (err) throw err;
     console.debug('Saved a qr code from node');
   });
-  const pyProg = spawn('python', ['./pycode/py-resize.py', '-f', `./${deviceName}.bmp`]);
+  const pyProg = spawn('python3', ['./pycode/py-resize.py', '-f', `./${deviceName}.bmp`]);
 }
 
 /**

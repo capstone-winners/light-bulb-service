@@ -19,8 +19,9 @@ def main(image_file: str):
 
     #if verbose: logging.basicConfig(level=logging.DEBUG) 
     #else: logging.basicConfig(level=logging.INFO)
-    print("Python received")
-    print(image_file)
+    with open("./tom.txt", "w+") as f:
+        f.write("Python received file name")
+        f.write(image_file)
 
     try:
         logging.info("QR Code DRAW")
