@@ -2,7 +2,7 @@ const lifx = require("node-lifx-lan");
 const _ = require("lodash");
 const QRCode = require("qrcode");
 const awsIot = require("aws-iot-device-sdk");
-const { spawn } = require("child_process");
+const { spawn } = require('child_process');
 
 const config = require("../config/config.js");
 
@@ -20,23 +20,34 @@ class LiFxBulbManager {
       // Discover all available LiFx lights in current LAN, and store the
       // LiFx object representing the one with the given `deviceName`.
       // Also retrieves the current status of that light bulb.
-      console.log('about to try discover the light bulb');
-      this.bulb = await discoverLiFxBulb(deviceName);
-      console.log('discovered bulb, in constructor');
-      console.log(JSON.stringify(this.bulb));
-      // Convert the bulb state into our proprietary capstone winner format
+      this.bulb = await lifx
+        .discover()
+        .then(devices => {
+          const b = devices.find(d => d["deviceInfo"]["label"] === deviceName);
+          if (_.isNil(b)) {
+            const msg = `Could not find bulb named ${deviceName}`;
+            generateErrorQRCode(msg);
+            throw new Error(msg);
+          }
+          console.log(`connected to deviced with the name '${deviceName}'`);
+          return b;
+        })
+        .catch(err => {
+          console.error(err.message);
+          throw new Error(err.message);
+        });
+
       this.updateState();
+
       // Create the AWS IoT device and subscribe to it's topics
       this.device = awsIot.device({
         keyPath: config.keyPath,
         certPath: config.certPath,
         caPath: config.caPath,
         clientId: config.clientId,
-        host: config.host,
-        port: config.port
+        host: config.host
       });
 
-      // Subscribe to the 'light' Greengrass message topic
       this.device.on("connect", () => {
         console.log("connected");
         this.device.subscribe("light");
@@ -133,45 +144,6 @@ class LiFxBulbManager {
   }
 }
 
-/**
- * Repeatedly tries to connect to a LiFx bulb with the given bulbName every
- * 2 seconds until connection is successful.
- *
- * @param bulbName        the name of the LiFx bulb.
- * @returns the LiFx bulb object once it's been successfully discovered.
- */
-async function discoverLiFxBulb(bulbName) {
-  const b = await discoverLiFxBulbHelper(bulbName);
-  if (!_.isNil(b)) {
-    console.log(`Discovered a bulb with the name '${bulbName}'`);
-    console.log(JSON.stringify(b));
-    return b;
-  }
-  const delay = t => new Promise(resolve => setTimeout(resolve, t));
-  delay.(2000)
-  setTimeout(async () => {
-    discoverLiFxBulb(bulbName);
-  }, 2000);
-}
-
-/**
- * Attempts to connect to a LiFx bulb with the given bulbName.
- */
-async function discoverLiFxBulbHelper(bulbName) {
-  return lifx.discover()
-    .then(devices => {
-      console.log(`saw devices:\n${JSON.stringify(devices)}`)
-      return devices.find(d => d["deviceInfo"]["label"] === deviceName);
-    })
-    .catch(err => {
-      console.error(err.message);
-      throw new Error(err.message);
-    });
-}
-
-/**
- * Polls the given bulbManager for it's status every 10 seconds.
- */
 async function pollStatus(bulbManager) {
   setTimeout(async () => {
     bulbManager.updateState();
@@ -193,22 +165,13 @@ function generateErrorQRCode(message) {
  * the image and then displays it on the e-ink display.
  */
 function generateQRCode(status, deviceName) {
-  QRCode.toFile(
-    `./${deviceName}.bmp`,
-    JSON.stringify(status),
-    {
-      width: 176
-    },
-    function(err) {
-      if (err) throw err;
-      console.debug("Saved a qr code from node");
-    }
-  );
-  const pyProg = spawn("python", [
-    "../py-resize.py",
-    "-f",
-    `./${deviceName}.bmp`
-  ]);
+  QRCode.toFile(`./${deviceName}.bmp`, JSON.stringify(status), {
+    "width": 176
+  }, function (err) {
+    if (err) throw err;
+    console.debug('Saved a qr code from node');
+  })
+  const pyProg = spawn('python', ['../py-resize.py', '-f', `./${deviceName}.bmp`]);
 }
 
 /**
