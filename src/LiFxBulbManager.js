@@ -20,7 +20,10 @@ class LiFxBulbManager {
       // Discover all available LiFx lights in current LAN, and store the
       // LiFx object representing the one with the given `deviceName`.
       // Also retrieves the current status of that light bulb.
-      this.bulb = discoverLiFxBulb(deviceName);
+      console.log('about to try discover the light bulb');
+      this.bulb = await discoverLiFxBulb(deviceName);
+      console.log('discovered bulb, in constructor');
+      console.log(JSON.stringify(this.bulb));
       // Convert the bulb state into our proprietary capstone winner format
       this.updateState();
       // Create the AWS IoT device and subscribe to it's topics
@@ -137,13 +140,16 @@ class LiFxBulbManager {
  * @param bulbName        the name of the LiFx bulb.
  * @returns the LiFx bulb object once it's been successfully discovered.
  */
-function discoverLiFxBulb(bulbName) {
+async function discoverLiFxBulb(bulbName) {
+  const b = await discoverLiFxBulbHelper(bulbName);
+  if (!_.isNil(b)) {
+    console.log(`Discovered a bulb with the name '${bulbName}'`);
+    console.log(JSON.stringify(b));
+    return b;
+  }
+  const delay = t => new Promise(resolve => setTimeout(resolve, t));
+  delay.(2000)
   setTimeout(async () => {
-    const b = discoverLiFxBulbHelper(bulbName);
-    if (!_.isNil(b)) {
-      console.log(`Discovered a bulb with the name '${bulbName}'`);
-      return b;
-    }
     discoverLiFxBulb(bulbName);
   }, 2000);
 }
@@ -152,9 +158,9 @@ function discoverLiFxBulb(bulbName) {
  * Attempts to connect to a LiFx bulb with the given bulbName.
  */
 async function discoverLiFxBulbHelper(bulbName) {
-  return await lifx
-    .discover()
+  return lifx.discover()
     .then(devices => {
+      console.log(`saw devices:\n${JSON.stringify(devices)}`)
       return devices.find(d => d["deviceInfo"]["label"] === deviceName);
     })
     .catch(err => {
